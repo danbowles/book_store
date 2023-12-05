@@ -17,7 +17,8 @@ defmodule BookStore.Application do
       # Start a worker by calling: BookStore.Worker.start_link(arg)
       # {BookStore.Worker, arg},
       # Start to serve requests, typically the last entry
-      BookStoreWeb.Endpoint
+      BookStoreWeb.Endpoint,
+      BookStore.BookRegistry.child_spec()
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
