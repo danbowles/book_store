@@ -8,18 +8,19 @@ defmodule BookStore.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      BookStoreWeb.Telemetry,
       BookStore.Repo,
+      BookStoreWeb.Telemetry,
       {DNSCluster, query: Application.get_env(:book_store, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: BookStore.PubSub},
       # Start the Finch HTTP client for sending emails
-      {Finch, name: BookStore.Finch},
+      # {Finch, name: BookStore.Finch},
       # Start a worker by calling: BookStore.Worker.start_link(arg)
       # {BookStore.Worker, arg},
       # Start to serve requests, typically the last entry
-      BookStoreWeb.Endpoint,
       BookStore.BookRegistry.child_spec(),
-      BookStore.BookDynamicSupervisor
+      BookStore.BookDynamicSupervisor,
+      BookStore.BookStateHydrator,
+      BookStoreWeb.Endpoint
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

@@ -14,11 +14,19 @@ defmodule BookStoreWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/", BookStoreWeb do
-    pipe_through :browser
+  scope "/api", BookStoreWeb do
+    pipe_through :api
 
-    get "/", PageController, :home
+    resources "/books", BookController, only: [:index, :show] do
+      post "/order", BookController, :order
+    end
   end
+
+  # scope "/", BookStoreWeb do
+  #   pipe_through :browser
+
+  #   get "/", PageController, :home
+  # end
 
   # Other scopes may use custom stacks.
   # scope "/api", BookStoreWeb do

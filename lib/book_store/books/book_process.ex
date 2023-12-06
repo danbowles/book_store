@@ -29,21 +29,50 @@ defmodule BookStore.Books.BookProcess do
     state
     |> update_book(attrs)
     |> case do
-      {:ok, book} ->
-        {:reply, book, book, {:continue, :perist_book_changes}}
+      {%Book{} = updated_book, _changeset} ->
+        {:reply, updated_book, updated_book, {:continue, :persist_book_changes}}
 
       error ->
         {:reply, error, state}
     end
+  end
 
-    changeset = Book.changeset(state, attrs)
+  @impl true
+  def handle_call(:order_copy, _from, %Book{quantity: 0} = state) do
+    {:reply, :no_copies_available, state}
+  end
 
-    case Repo.update(changeset) do
-      {:ok, book} ->
-        {:reply, book, book}
+  @impl true
+  def handle_call(:order_copy, _from, %Book{quantity: quantity} = state) do
+    state
+    |> update_book(%{quantity: quantity - 1})
+    |> case do
+      {%Book{} = updated_book, changeset} ->
+        {:reply, :ok, updated_book, {:continue, {:persist_book_changes, changeset}}}
 
-      {:error, changeset} ->
-        {:reply, changeset, state}
+      error ->
+        {:reply, error, state}
+    end
+  end
+
+  @impl true
+  def handle_continue({:persist_book_changes, changeset}, state) do
+    Repo.update(changeset)
+
+    {:noreply, state}
+  end
+
+  defp update_book(book, attrs) do
+    book
+    |> Book.changeset(attrs)
+    |> case do
+      %Changeset{valid?: true} = changeset ->
+        updated_book = Changeset.apply_changes(changeset)
+
+        {updated_book, changeset}
+
+      error_changeset ->
+        {:error, error_changeset}
     end
   end
 end
