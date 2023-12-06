@@ -18,7 +18,8 @@ defmodule BookStore.Application do
       # {BookStore.Worker, arg},
       # Start to serve requests, typically the last entry
       BookStoreWeb.Endpoint,
-      BookStore.BookRegistry.child_spec()
+      BookStore.BookRegistry.child_spec(),
+      BookStore.BookDynamicSupervisor
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
